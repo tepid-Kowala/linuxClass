@@ -6,11 +6,30 @@ set -e
 PLUGIN_DIR="$HOME/.claude/plugins/companion"
 CONFIG_FILE="$HOME/.claude/companion/config.json"
 
-# Clean slate
+# Self-locate to repo root
+REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+
+# Save existing config if present
+EXISTING_CONFIG=""
+if [ -f "$CONFIG_FILE" ]; then
+  EXISTING_CONFIG=$(cat "$CONFIG_FILE")
+fi
+
+# Clean slate for testing
 rm -rf "$PLUGIN_DIR" "$HOME/.claude/companion"
 
+# Cleanup trap to restore existing config
+cleanup() {
+  rm -rf "$PLUGIN_DIR" "$HOME/.claude/companion"
+  if [ -n "$EXISTING_CONFIG" ]; then
+    mkdir -p "$(dirname "$CONFIG_FILE")"
+    echo "$EXISTING_CONFIG" > "$CONFIG_FILE"
+  fi
+}
+trap cleanup EXIT
+
 # Run installer
-cd /home/wes/Desktop/linuxClass
+cd "$REPO_ROOT"
 bash install.sh
 
 # Test 1: plugin directory exists

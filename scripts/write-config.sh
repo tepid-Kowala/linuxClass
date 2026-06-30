@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 # scripts/write-config.sh <axis> <value>
 # Updates one personality value. Validates axis name and 0-10 range.
+set -e
 
 AXIS="$1"
 VALUE="$2"
@@ -31,4 +32,4 @@ CONF
 fi
 
 TMP=$(mktemp)
-jq ".$AXIS = $VALUE" "$CONFIG_FILE" > "$TMP" && mv "$TMP" "$CONFIG_FILE"
+jq ".$AXIS = $VALUE" "$CONFIG_FILE" > "$TMP" && mv "$TMP" "$CONFIG_FILE" || { rm -f "$TMP"; echo "ERROR: failed to write config" >&2; exit 1; }

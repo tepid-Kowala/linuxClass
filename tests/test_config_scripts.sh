@@ -2,6 +2,8 @@
 # tests/test_config_scripts.sh
 set -e
 
+cd "$(dirname "${BASH_SOURCE[0]}")/.."
+
 CONFIG_FILE="$HOME/.claude/companion/config.json"
 READ_SCRIPT="./scripts/read-config.sh"
 WRITE_SCRIPT="./scripts/write-config.sh"
