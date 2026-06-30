@@ -9,6 +9,7 @@ if [ ! -f "$CONFIG_FILE" ]; then
   mkdir -p "$(dirname "$CONFIG_FILE")"
   cat > "$CONFIG_FILE" << 'CONF'
 {
+  "name": "Steve Bobs",
   "friendly": 7,
   "sarcasm": 5,
   "energy": 8

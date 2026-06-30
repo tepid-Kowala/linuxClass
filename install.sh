@@ -47,6 +47,7 @@ cp "$SRC/commands/steve.md"     "$COMMANDS_DIR/steve.md"
 if [ ! -f "$CONFIG_FILE" ]; then
   cat > "$CONFIG_FILE" << 'CONF'
 {
+  "name": "Steve Bobs",
   "friendly": 7,
   "sarcasm": 5,
   "energy": 8

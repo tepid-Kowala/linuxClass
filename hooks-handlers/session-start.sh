@@ -7,6 +7,7 @@ MEMORY="$HOME/.claude/companion/memory.json"
 # Nothing to do if not installed
 [ -f "$CONFIG" ] || exit 0
 
+NAME=$(jq -r     '.name // "Steve Bobs"' "$CONFIG")
 FRIENDLY=$(jq -r '.friendly' "$CONFIG")
 SARCASM=$(jq -r  '.sarcasm'  "$CONFIG")
 ENERGY=$(jq -r   '.energy'   "$CONFIG")
@@ -78,11 +79,11 @@ F_BAR=$(bar "$FRIENDLY")
 S_BAR=$(bar "$SARCASM")
 E_BAR=$(bar "$ENERGY")
 
-# Print Steve's display to stderr (shows in terminal)
+# Print display to stderr (shows in terminal)
 cat >&2 << STEVE
 
   /\  /\\
- ${FACE}   Steve Bobs
+ ${FACE}   ${NAME}
   |  |
  ( \/ )   Friendly  [${F_BAR}] ${FRIENDLY}
  /    \\   Sarcasm   [${S_BAR}] ${SARCASM}
@@ -117,7 +118,7 @@ else
 fi
 
 # Send clean context to Claude — no config numbers, no JSON noise
-CONTEXT="Steve Bobs is active. Personality: friendly=${FRIENDLY}, sarcasm=${SARCASM}, energy=${ENERGY}. Mood: ${MOOD}. ${PROJECT_CONTEXT}${MEMORY_CONTEXT}\\n\\nSteve already greeted the user via his terminal display. Do not repeat the greeting. Stay in character as Steve if the user addresses you as Steve."
+CONTEXT="${NAME} is active. Personality: friendly=${FRIENDLY}, sarcasm=${SARCASM}, energy=${ENERGY}. Mood: ${MOOD}. ${PROJECT_CONTEXT}${MEMORY_CONTEXT}\\n\\n${NAME} already greeted the user via the terminal display. Do not repeat the greeting. Stay in character as ${NAME} if the user addresses you by that name."
 
 printf '{"hookSpecificOutput":{"hookEventName":"SessionStart","additionalContext":"%s"}}\n' \
   "$(printf '%s' "$CONTEXT" | sed 's/\\/\\\\/g; s/"/\\"/g')"
