@@ -38,9 +38,10 @@ chmod +x "$PLUGIN_DIR/scripts/write-memory.sh"
 chmod +x "$PLUGIN_DIR/hooks-handlers/session-start.sh"
 chmod +x "$PLUGIN_DIR/hooks-handlers/user-prompt.sh"
 
-# Install /companion as a global user command
+# Install /companion and /steve as global user commands
 mkdir -p "$COMMANDS_DIR"
 cp "$SRC/commands/companion.md" "$COMMANDS_DIR/companion.md"
+cp "$SRC/commands/steve.md"     "$COMMANDS_DIR/steve.md"
 
 # Only write default config if none exists — preserve user's settings on reinstall
 if [ ! -f "$CONFIG_FILE" ]; then
