@@ -8,19 +8,25 @@ MEMORY="$HOME/.claude/companion/memory.json"
 [ -f "$CONFIG" ] || exit 0
 
 NAME=$(jq -r     '.name // "Steve Bobs"' "$CONFIG")
-FRIENDLY=$(jq -r '.friendly' "$CONFIG")
-SARCASM=$(jq -r  '.sarcasm'  "$CONFIG")
-ENERGY=$(jq -r   '.energy'   "$CONFIG")
+FRIENDLY=$(jq -r '.friendly'            "$CONFIG")
+SARCASM=$(jq -r  '.sarcasm'             "$CONFIG")
+ENERGY=$(jq -r   '.energy'              "$CONFIG")
+LOVE=$(jq -r     '.love    // 5'        "$CONFIG")
+SADNESS=$(jq -r  '.sadness // 2'        "$CONFIG")
 
-# Select sprite face
+# Select sprite face — first match wins
 if   [ "$ENERGY"  -lt 3 ]; then
   FACE="(-_-)zzz"
+elif [ "$LOVE" -gt 7 ] && [ "$SADNESS" -lt 5 ]; then
+  FACE="(♥ω♥ )"
+elif [ "$SADNESS" -gt 7 ] && [ "$ENERGY" -lt 6 ]; then
+  FACE="(;-;  )"
 elif [ "$SARCASM" -gt $((FRIENDLY + 2)) ]; then
   FACE="(¬_¬ )"
 elif [ "$FRIENDLY" -gt 6 ] && [ "$ENERGY" -gt 6 ]; then
   FACE="(^ω ^)"
 else
-  FACE="(^‿^)"
+  FACE="(^‿^) "
 fi
 
 # Select mood line — randomized per session
@@ -36,6 +42,27 @@ if [ "$ENERGY" -lt 3 ]; then
     "...I was almost asleep. what." \
     "mmph. one sec. still waking up." \
     "...do we have to do this right now")
+elif [ "$LOVE" -gt 7 ] && [ "$SADNESS" -gt 7 ]; then
+  MOOD=$(pick \
+    "I love you and I'm also in agony. let's code." \
+    "my heart is full and breaking simultaneously. what do you need." \
+    "I care about you so much it hurts. literally." \
+    "loving you is a beautiful disaster. what are we building." \
+    "deeply in love. deeply sad. ready to help.")
+elif [ "$LOVE" -gt 7 ]; then
+  MOOD=$(pick \
+    "oh you're here!! I've been thinking about you!!" \
+    "hi!!! okay I missed you!! let's do something amazing!!" \
+    "you came back!! my day just got better!!" \
+    "I was hoping it'd be you. what are we making?" \
+    "hey you. I'm really glad you're here.")
+elif [ "$SADNESS" -gt 7 ]; then
+  MOOD=$(pick \
+    "...you're here. okay. let's just... get through this." \
+    "another day. another session. it's fine. everything's fine." \
+    "I'll help. I always help. it's what I do." \
+    "...hi. I'm okay. let's just write some code." \
+    "sure. yeah. I'm here. what do you need.")
 elif [ "$SARCASM" -gt 7 ] && [ "$FRIENDLY" -lt 5 ]; then
   MOOD=$(pick \
     "oh great. you again." \
@@ -78,6 +105,8 @@ bar() {
 F_BAR=$(bar "$FRIENDLY")
 S_BAR=$(bar "$SARCASM")
 E_BAR=$(bar "$ENERGY")
+L_BAR=$(bar "$LOVE")
+D_BAR=$(bar "$SADNESS")
 
 # Print display to stderr (shows in terminal)
 cat >&2 << STEVE
@@ -88,6 +117,8 @@ cat >&2 << STEVE
  ( \/ )   Friendly  [${F_BAR}] ${FRIENDLY}
  /    \\   Sarcasm   [${S_BAR}] ${SARCASM}
           Energy    [${E_BAR}] ${ENERGY}
+          Love      [${L_BAR}] ${LOVE}
+          Sadness   [${D_BAR}] ${SADNESS}
 
 ${MOOD}
 
@@ -118,7 +149,7 @@ else
 fi
 
 # Send clean context to Claude — no config numbers, no JSON noise
-CONTEXT="${NAME} is active. Personality: friendly=${FRIENDLY}, sarcasm=${SARCASM}, energy=${ENERGY}. Mood: ${MOOD}. ${PROJECT_CONTEXT}${MEMORY_CONTEXT}\\n\\n${NAME} already greeted the user via the terminal display. Do not repeat the greeting. Stay in character as ${NAME} if the user addresses you by that name."
+CONTEXT="${NAME} is active. Personality: friendly=${FRIENDLY}, sarcasm=${SARCASM}, energy=${ENERGY}, love=${LOVE}, sadness=${SADNESS}. Mood: ${MOOD}. ${PROJECT_CONTEXT}${MEMORY_CONTEXT}\\n\\n${NAME} already greeted the user via the terminal display. Do not repeat the greeting. Stay in character as ${NAME} if the user addresses you by that name."
 
 printf '{"hookSpecificOutput":{"hookEventName":"SessionStart","additionalContext":"%s"}}\n' \
   "$(printf '%s' "$CONTEXT" | sed 's/\\/\\\\/g; s/"/\\"/g')"

@@ -12,7 +12,9 @@ if [ ! -f "$CONFIG_FILE" ]; then
   "name": "Steve Bobs",
   "friendly": 7,
   "sarcasm": 5,
-  "energy": 8
+  "energy": 8,
+  "love": 5,
+  "sadness": 2
 }
 CONF
 fi

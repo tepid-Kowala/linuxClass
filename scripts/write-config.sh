@@ -8,9 +8,9 @@ VALUE="$2"
 CONFIG_FILE="$HOME/.claude/companion/config.json"
 
 case "$AXIS" in
-  friendly|sarcasm|energy|name) ;;
+  friendly|sarcasm|energy|love|sadness|name) ;;
   *)
-    echo "ERROR: unknown axis '$AXIS'. Valid axes: friendly, sarcasm, energy, name" >&2
+    echo "ERROR: unknown axis '$AXIS'. Valid axes: friendly, sarcasm, energy, love, sadness, name" >&2
     exit 1
     ;;
 esac
@@ -22,7 +22,9 @@ if [ ! -f "$CONFIG_FILE" ]; then
   "name": "Steve Bobs",
   "friendly": 7,
   "sarcasm": 5,
-  "energy": 8
+  "energy": 8,
+  "love": 5,
+  "sadness": 2
 }
 CONF
 fi
