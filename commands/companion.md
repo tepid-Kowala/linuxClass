@@ -223,8 +223,7 @@ Feeding boosts energy +1 (max 10) and reduces hunger -2 (min 0).
    - default → "I'm good. already at max energy."
 3. Otherwise set `NEW_ENERGY = energy + 1`, `NEW_HUNGER = max(0, hunger - 2)`. Run:
    ```bash
-   ~/.claude/plugins/companion/scripts/write-config.sh energy <NEW_ENERGY>
-   ~/.claude/plugins/companion/scripts/write-config.sh hunger <NEW_HUNGER>
+   ~/.claude/plugins/companion/scripts/set-config.sh energy=<NEW_ENERGY> hunger=<NEW_HUNGER>
    ```
 4. Increment and check achievement:
    ```bash
@@ -251,7 +250,7 @@ Patting boosts friendly +1. Blocked if `sarcasm` >= 8.
    Stop. Do not redisplay.
 3. Otherwise set `NEW_FRIENDLY = min(10, friendly + 1)`. Run:
    ```bash
-   ~/.claude/plugins/companion/scripts/write-config.sh friendly <NEW_FRIENDLY>
+   ~/.claude/plugins/companion/scripts/set-config.sh friendly=<NEW_FRIENDLY>
    ```
 4. Increment and check achievement: `times_patted`
 5. Respond in personality voice (first match):
@@ -273,8 +272,7 @@ Playing drains energy -1 (min 0) and increases hunger +1 (max 10).
    - default → "Too tired. Not happening."
 3. Otherwise set `NEW_ENERGY = energy - 1`, `NEW_HUNGER = min(10, hunger + 1)`. Run:
    ```bash
-   ~/.claude/plugins/companion/scripts/write-config.sh energy <NEW_ENERGY>
-   ~/.claude/plugins/companion/scripts/write-config.sh hunger <NEW_HUNGER>
+   ~/.claude/plugins/companion/scripts/set-config.sh energy=<NEW_ENERGY> hunger=<NEW_HUNGER>
    ```
 4. Increment and check achievement: `times_played`
 5. Respond in personality voice (first match):
@@ -296,8 +294,7 @@ Whipping reduces friendly -1 (min 0) and raises anger +1 (max 10).
    - default → "Already at zero. Nothing left to take."
 3. Otherwise set `NEW_FRIENDLY = friendly - 1`, `NEW_ANGER = min(10, anger + 1)`. Run:
    ```bash
-   ~/.claude/plugins/companion/scripts/write-config.sh friendly <NEW_FRIENDLY>
-   ~/.claude/plugins/companion/scripts/write-config.sh anger <NEW_ANGER>
+   ~/.claude/plugins/companion/scripts/set-config.sh friendly=<NEW_FRIENDLY> anger=<NEW_ANGER>
    ```
 4. Increment and check achievement: `times_whipped`
 5. Respond in personality voice (first match):
@@ -315,8 +312,7 @@ Putting the companion to sleep. Boosts sadness +1, drains energy -2 (min 0).
 1. Read current `sadness` and `energy`.
 2. Set `NEW_SADNESS = min(10, sadness + 1)`, `NEW_ENERGY = max(0, energy - 2)`. Run:
    ```bash
-   ~/.claude/plugins/companion/scripts/write-config.sh sadness <NEW_SADNESS>
-   ~/.claude/plugins/companion/scripts/write-config.sh energy <NEW_ENERGY>
+   ~/.claude/plugins/companion/scripts/set-config.sh sadness=<NEW_SADNESS> energy=<NEW_ENERGY>
    ```
 3. Increment and check achievement: `times_slept`
 4. Respond in personality voice (first match):
@@ -339,8 +335,7 @@ Hugging boosts both friendly +1 and love +1. Blocked if `sarcasm` >= 8 AND `love
    Stop. Do not redisplay.
 3. Otherwise set `NEW_FRIENDLY = min(10, friendly + 1)`, `NEW_LOVE = min(10, love + 1)`. Run:
    ```bash
-   ~/.claude/plugins/companion/scripts/write-config.sh friendly <NEW_FRIENDLY>
-   ~/.claude/plugins/companion/scripts/write-config.sh love <NEW_LOVE>
+   ~/.claude/plugins/companion/scripts/set-config.sh friendly=<NEW_FRIENDLY> love=<NEW_LOVE>
    ```
 4. Increment and check achievement: `times_hugged`
 5. Respond in personality voice (first match):
@@ -362,8 +357,7 @@ Ignoring the companion drops love -1 (min 0) and raises anger +1 (max 10).
    - default → "Nothing left to take."
 3. Otherwise set `NEW_LOVE = love - 1`, `NEW_ANGER = min(10, anger + 1)`. Run:
    ```bash
-   ~/.claude/plugins/companion/scripts/write-config.sh love <NEW_LOVE>
-   ~/.claude/plugins/companion/scripts/write-config.sh anger <NEW_ANGER>
+   ~/.claude/plugins/companion/scripts/set-config.sh love=<NEW_LOVE> anger=<NEW_ANGER>
    ```
 4. Increment and check achievement: `times_ignored`
 5. Respond in personality voice (first match):
@@ -535,7 +529,7 @@ Valid axes: `friendly`, `sarcasm`, `energy`, `love`, `sadness`, `anger`, `hunger
 
 Run:
 ```bash
-~/.claude/plugins/companion/scripts/write-config.sh <axis> <value>
+~/.claude/plugins/companion/scripts/set-config.sh <axis>=<value>
 ```
 
 If error, display it. If success, redisplay (Steps 1–4).
@@ -547,14 +541,7 @@ Restore all defaults.
 
 Run:
 ```bash
-~/.claude/plugins/companion/scripts/write-config.sh name "Steve Bobs"
-~/.claude/plugins/companion/scripts/write-config.sh friendly 7
-~/.claude/plugins/companion/scripts/write-config.sh sarcasm 5
-~/.claude/plugins/companion/scripts/write-config.sh energy 8
-~/.claude/plugins/companion/scripts/write-config.sh love 5
-~/.claude/plugins/companion/scripts/write-config.sh sadness 2
-~/.claude/plugins/companion/scripts/write-config.sh anger 2
-~/.claude/plugins/companion/scripts/write-config.sh hunger 5
+~/.claude/plugins/companion/scripts/set-config.sh name="Steve Bobs" friendly=7 sarcasm=5 energy=8 love=5 sadness=2 anger=2 hunger=5
 ```
 
 Redisplay (Steps 1–4).
