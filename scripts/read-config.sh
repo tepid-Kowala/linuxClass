@@ -14,7 +14,9 @@ if [ ! -f "$CONFIG_FILE" ]; then
   "sarcasm": 5,
   "energy": 8,
   "love": 5,
-  "sadness": 2
+  "sadness": 2,
+  "anger": 2,
+  "hunger": 5
 }
 CONF
 fi

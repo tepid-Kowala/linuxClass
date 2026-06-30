@@ -28,6 +28,10 @@ cp "$SRC/scripts/read-config.sh"                    "$PLUGIN_DIR/scripts/read-co
 cp "$SRC/scripts/write-config.sh"                   "$PLUGIN_DIR/scripts/write-config.sh"
 cp "$SRC/scripts/read-memory.sh"                    "$PLUGIN_DIR/scripts/read-memory.sh"
 cp "$SRC/scripts/write-memory.sh"                   "$PLUGIN_DIR/scripts/write-memory.sh"
+cp "$SRC/scripts/achievements.sh"                   "$PLUGIN_DIR/scripts/achievements.sh"
+cp "$SRC/scripts/decay.sh"                          "$PLUGIN_DIR/scripts/decay.sh"
+cp "$SRC/scripts/mood-history.sh"                   "$PLUGIN_DIR/scripts/mood-history.sh"
+cp "$SRC/scripts/companions.sh"                     "$PLUGIN_DIR/scripts/companions.sh"
 cp "$SRC/hooks-handlers/session-start.sh"           "$PLUGIN_DIR/hooks-handlers/session-start.sh"
 cp "$SRC/hooks-handlers/user-prompt.sh"             "$PLUGIN_DIR/hooks-handlers/user-prompt.sh"
 
@@ -35,6 +39,10 @@ chmod +x "$PLUGIN_DIR/scripts/read-config.sh"
 chmod +x "$PLUGIN_DIR/scripts/write-config.sh"
 chmod +x "$PLUGIN_DIR/scripts/read-memory.sh"
 chmod +x "$PLUGIN_DIR/scripts/write-memory.sh"
+chmod +x "$PLUGIN_DIR/scripts/achievements.sh"
+chmod +x "$PLUGIN_DIR/scripts/decay.sh"
+chmod +x "$PLUGIN_DIR/scripts/mood-history.sh"
+chmod +x "$PLUGIN_DIR/scripts/companions.sh"
 chmod +x "$PLUGIN_DIR/hooks-handlers/session-start.sh"
 chmod +x "$PLUGIN_DIR/hooks-handlers/user-prompt.sh"
 
@@ -52,7 +60,9 @@ if [ ! -f "$CONFIG_FILE" ]; then
   "sarcasm": 5,
   "energy": 8,
   "love": 5,
-  "sadness": 2
+  "sadness": 2,
+  "anger": 2,
+  "hunger": 5
 }
 CONF
 fi

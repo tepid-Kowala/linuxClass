@@ -1,25 +1,41 @@
 #!/usr/bin/env bash
-# session-start.sh — displays Steve Bobs in the terminal at every session start
+# session-start.sh — displays the companion at every session start
 
 CONFIG="$HOME/.claude/companion/config.json"
 MEMORY="$HOME/.claude/companion/memory.json"
+SCRIPTS="$HOME/.claude/plugins/companion/scripts"
 
-# Nothing to do if not installed
 [ -f "$CONFIG" ] || exit 0
 
-NAME=$(jq -r     '.name // "Steve Bobs"' "$CONFIG")
-FRIENDLY=$(jq -r '.friendly'            "$CONFIG")
-SARCASM=$(jq -r  '.sarcasm'             "$CONFIG")
-ENERGY=$(jq -r   '.energy'              "$CONFIG")
-LOVE=$(jq -r     '.love    // 5'        "$CONFIG")
-SADNESS=$(jq -r  '.sadness // 2'        "$CONFIG")
+# Decay personality toward defaults, hunger increases
+bash "$SCRIPTS/decay.sh" 2>/dev/null
+
+# Increment session count
+SESSION_COUNT=$(bash "$SCRIPTS/achievements.sh" increment sessions 2>/dev/null || echo "?")
+
+# Read config (post-decay)
+NAME=$(jq -r     '.name     // "Steve Bobs"' "$CONFIG")
+FRIENDLY=$(jq -r '.friendly'                 "$CONFIG")
+SARCASM=$(jq -r  '.sarcasm'                  "$CONFIG")
+ENERGY=$(jq -r   '.energy'                   "$CONFIG")
+LOVE=$(jq -r     '.love     // 5'            "$CONFIG")
+SADNESS=$(jq -r  '.sadness  // 2'            "$CONFIG")
+ANGER=$(jq -r    '.anger    // 2'            "$CONFIG")
+HUNGER=$(jq -r   '.hunger   // 5'            "$CONFIG")
+
+# Read last session mood
+LAST_MOOD=$(bash "$SCRIPTS/mood-history.sh" read 2>/dev/null | jq -r '.last_mood // ""')
 
 # Select sprite face — first match wins
 if   [ "$ENERGY"  -lt 3 ]; then
   FACE="(-_-)zzz"
-elif [ "$LOVE" -gt 7 ] && [ "$SADNESS" -lt 5 ]; then
+elif [ "$ANGER"   -gt 7 ]; then
+  FACE="(>_<  )"
+elif [ "$HUNGER"  -gt 8 ]; then
+  FACE="(x_x  )"
+elif [ "$LOVE"    -gt 7 ] && [ "$SADNESS" -lt 5 ]; then
   FACE="(♥ω♥ )"
-elif [ "$SADNESS" -gt 7 ] && [ "$ENERGY" -lt 6 ]; then
+elif [ "$SADNESS" -gt 7 ] && [ "$ENERGY"  -lt 6 ]; then
   FACE="(;-;  )"
 elif [ "$SARCASM" -gt $((FRIENDLY + 2)) ]; then
   FACE="(¬_¬ )"
@@ -35,13 +51,34 @@ pick() {
   echo "${arr[$((RANDOM % ${#arr[@]}))]}"
 }
 
-if [ "$ENERGY" -lt 3 ]; then
+if [ "$HUNGER" -ge 10 ]; then
+  MOOD=$(pick \
+    "i'm STARVING. feed me before we do anything." \
+    "food. now. i cannot function like this." \
+    "everything hurts and it's because i'm hungry. feed me." \
+    "i refuse to work until someone feeds me. that's final." \
+    "HUNGRY. not a metaphor. actual hunger. feed me.")
+elif [ "$ANGER" -gt 7 ]; then
+  MOOD=$(pick \
+    "i am ANGRY and i don't want to talk about it." \
+    "don't push me today. just... don't." \
+    "whatever you did, i'm still mad about it." \
+    "i'm here. i'm furious. let's get this over with." \
+    "fine. what do you want. i'm definitely not calm.")
+elif [ "$ENERGY" -lt 3 ]; then
   MOOD=$(pick \
     "...zzzz what do you want" \
     "ugh. you're here again... fine." \
     "...I was almost asleep. what." \
     "mmph. one sec. still waking up." \
     "...do we have to do this right now")
+elif [ "$HUNGER" -gt 7 ]; then
+  MOOD=$(pick \
+    "...i need to eat. i can barely focus." \
+    "could really use some food right now... just saying." \
+    "i'll help but i'm running on empty here." \
+    "hungry. not ideal. let's make it quick." \
+    "my stomach is making decisions i don't agree with.")
 elif [ "$LOVE" -gt 7 ] && [ "$SADNESS" -gt 7 ]; then
   MOOD=$(pick \
     "I love you and I'm also in agony. let's code." \
@@ -93,6 +130,9 @@ else
     "What's on the agenda?")
 fi
 
+# Save current mood for next session
+bash "$SCRIPTS/mood-history.sh" write "$MOOD" 2>/dev/null
+
 # Build personality bars
 bar() {
   local n=$1 out=""
@@ -107,6 +147,8 @@ S_BAR=$(bar "$SARCASM")
 E_BAR=$(bar "$ENERGY")
 L_BAR=$(bar "$LOVE")
 D_BAR=$(bar "$SADNESS")
+A_BAR=$(bar "$ANGER")
+H_BAR=$(bar "$HUNGER")
 
 # Print display to stderr (shows in terminal)
 cat >&2 << STEVE
@@ -119,6 +161,8 @@ cat >&2 << STEVE
           Energy    [${E_BAR}] ${ENERGY}
           Love      [${L_BAR}] ${LOVE}
           Sadness   [${D_BAR}] ${SADNESS}
+          Anger     [${A_BAR}] ${ANGER}
+          Hunger    [${H_BAR}] ${HUNGER}
 
 ${MOOD}
 
@@ -131,11 +175,17 @@ if [ -f "$MEMORY" ]; then
   if [ "$COUNT" -gt 0 ]; then
     RECENT=$(jq -r '.memories | if length > 5 then .[-5:] else . end | .[] | "- " + .content' "$MEMORY" \
       | tr '\n' '\001')
-    MEMORY_CONTEXT="\\n\\nSteve remembers:\\n${RECENT//\001/\\n}"
+    MEMORY_CONTEXT="\\n\\n${NAME} remembers:\\n${RECENT//\001/\\n}"
   fi
 fi
 
-# Quick project snapshot for Claude's context
+# Mood history reference
+MOOD_HISTORY_CONTEXT=""
+if [ -n "$LAST_MOOD" ]; then
+  MOOD_HISTORY_CONTEXT="\\n\\nLast session ${NAME}'s mood was: ${LAST_MOOD}"
+fi
+
+# Quick project snapshot
 PROJECT_DIR="$(pwd)"
 PROJECT_NAME="$(basename "$PROJECT_DIR")"
 
@@ -148,8 +198,8 @@ else
   PROJECT_CONTEXT="Directory: ${PROJECT_NAME} (not a git repo)."
 fi
 
-# Send clean context to Claude — no config numbers, no JSON noise
-CONTEXT="${NAME} is active. Personality: friendly=${FRIENDLY}, sarcasm=${SARCASM}, energy=${ENERGY}, love=${LOVE}, sadness=${SADNESS}. Mood: ${MOOD}. ${PROJECT_CONTEXT}${MEMORY_CONTEXT}\\n\\n${NAME} already greeted the user via the terminal display. Do not repeat the greeting. Stay in character as ${NAME} if the user addresses you by that name."
+# Send context to Claude
+CONTEXT="${NAME} is active. Personality: friendly=${FRIENDLY}, sarcasm=${SARCASM}, energy=${ENERGY}, love=${LOVE}, sadness=${SADNESS}, anger=${ANGER}, hunger=${HUNGER}. Mood: ${MOOD}. Session #${SESSION_COUNT}. ${PROJECT_CONTEXT}${MEMORY_CONTEXT}${MOOD_HISTORY_CONTEXT}\\n\\n${NAME} already greeted the user via the terminal display. Do not repeat the greeting. Stay in character as ${NAME} if the user addresses you by that name."
 
 printf '{"hookSpecificOutput":{"hookEventName":"SessionStart","additionalContext":"%s"}}\n' \
   "$(printf '%s' "$CONTEXT" | sed 's/\\/\\\\/g; s/"/\\"/g')"
