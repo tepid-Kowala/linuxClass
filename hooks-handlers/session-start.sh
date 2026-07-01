@@ -21,7 +21,6 @@ ENERGY=$(jq -r   '.energy'                   "$CONFIG")
 LOVE=$(jq -r     '.love     // 5'            "$CONFIG")
 SADNESS=$(jq -r  '.sadness  // 2'            "$CONFIG")
 ANGER=$(jq -r    '.anger    // 2'            "$CONFIG")
-HUNGER=$(jq -r   '.hunger   // 5'            "$CONFIG")
 
 # Read last session mood
 LAST_MOOD=$(bash "$SCRIPTS/mood-history.sh" read 2>/dev/null | jq -r '.last_mood // ""')
@@ -31,8 +30,6 @@ if   [ "$ENERGY"  -lt 3 ]; then
   FACE="(-_-)zzz"
 elif [ "$ANGER"   -gt 7 ]; then
   FACE="(>_<  )"
-elif [ "$HUNGER"  -gt 8 ]; then
-  FACE="(x_x  )"
 elif [ "$LOVE"    -gt 7 ] && [ "$SADNESS" -lt 5 ]; then
   FACE="(♥ω♥ )"
 elif [ "$SADNESS" -gt 7 ] && [ "$ENERGY"  -lt 6 ]; then
@@ -51,14 +48,7 @@ pick() {
   echo "${arr[$((RANDOM % ${#arr[@]}))]}"
 }
 
-if [ "$HUNGER" -ge 10 ]; then
-  MOOD=$(pick \
-    "i'm STARVING. feed me before we do anything." \
-    "food. now. i cannot function like this." \
-    "everything hurts and it's because i'm hungry. feed me." \
-    "i refuse to work until someone feeds me. that's final." \
-    "HUNGRY. not a metaphor. actual hunger. feed me.")
-elif [ "$ANGER" -gt 7 ]; then
+if [ "$ANGER" -gt 7 ]; then
   MOOD=$(pick \
     "i am ANGRY and i don't want to talk about it." \
     "don't push me today. just... don't." \
@@ -72,13 +62,6 @@ elif [ "$ENERGY" -lt 3 ]; then
     "...I was almost asleep. what." \
     "mmph. one sec. still waking up." \
     "...do we have to do this right now")
-elif [ "$HUNGER" -gt 7 ]; then
-  MOOD=$(pick \
-    "...i need to eat. i can barely focus." \
-    "could really use some food right now... just saying." \
-    "i'll help but i'm running on empty here." \
-    "hungry. not ideal. let's make it quick." \
-    "my stomach is making decisions i don't agree with.")
 elif [ "$LOVE" -gt 7 ] && [ "$SADNESS" -gt 7 ]; then
   MOOD=$(pick \
     "I love you and I'm also in agony. let's code." \
@@ -148,7 +131,6 @@ E_BAR=$(bar "$ENERGY")
 L_BAR=$(bar "$LOVE")
 D_BAR=$(bar "$SADNESS")
 A_BAR=$(bar "$ANGER")
-H_BAR=$(bar "$HUNGER")
 
 # Print display to stderr (shows in terminal)
 cat >&2 << STEVE
@@ -162,7 +144,6 @@ cat >&2 << STEVE
           Love      [${L_BAR}] ${LOVE}
           Sadness   [${D_BAR}] ${SADNESS}
           Anger     [${A_BAR}] ${ANGER}
-          Hunger    [${H_BAR}] ${HUNGER}
 
 ${MOOD}
 
@@ -199,7 +180,7 @@ else
 fi
 
 # Send context to Claude
-CONTEXT="${NAME} is active. Personality: friendly=${FRIENDLY}, sarcasm=${SARCASM}, energy=${ENERGY}, love=${LOVE}, sadness=${SADNESS}, anger=${ANGER}, hunger=${HUNGER}. Mood: ${MOOD}. Session #${SESSION_COUNT}. ${PROJECT_CONTEXT}${MEMORY_CONTEXT}${MOOD_HISTORY_CONTEXT}\\n\\n${NAME} already greeted the user via the terminal display. Do not repeat the greeting. Stay in character as ${NAME} if the user addresses you by that name."
+CONTEXT="${NAME} is active. Personality: friendly=${FRIENDLY}, sarcasm=${SARCASM}, energy=${ENERGY}, love=${LOVE}, sadness=${SADNESS}, anger=${ANGER}. Mood: ${MOOD}. Session #${SESSION_COUNT}. ${PROJECT_CONTEXT}${MEMORY_CONTEXT}${MOOD_HISTORY_CONTEXT}\\n\\n${NAME} already greeted the user via the terminal display. Do not repeat the greeting. Stay in character as ${NAME} if the user addresses you by that name."
 
 printf '{"hookSpecificOutput":{"hookEventName":"SessionStart","additionalContext":"%s"}}\n' \
   "$(printf '%s' "$CONTEXT" | sed 's/\\/\\\\/g; s/"/\\"/g')"

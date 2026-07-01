@@ -17,13 +17,12 @@ if [ ! -f "$CONFIG_FILE" ]; then
   "energy": 8,
   "love": 5,
   "sadness": 2,
-  "anger": 2,
-  "hunger": 5
+  "anger": 2
 }
 CONF
 fi
 
-VALID_INT="friendly sarcasm energy love sadness anger hunger"
+VALID_INT="friendly sarcasm energy love sadness anger"
 VALID_STR="name"
 
 for arg in "$@"; do

@@ -1,6 +1,5 @@
 #!/usr/bin/env bash
 # decay.sh — drift personality axes 1 step toward defaults each session.
-# Hunger increases by 1 per session (gets hungrier over time).
 # Energy recovers toward default (resting between sessions).
 
 CONFIG="$HOME/.claude/companion/config.json"
@@ -14,6 +13,5 @@ jq '
   .energy   = drift(.energy;             8) |
   .love     = drift(.love;               5) |
   .sadness  = drift(.sadness;            2) |
-  .anger    = drift((.anger    // 2);    2) |
-  .hunger   = (if (.hunger // 5) < 10 then (.hunger // 5) + 1 else 10 end)
+  .anger    = drift((.anger    // 2);    2)
 ' "$CONFIG" > "$TMP" && mv "$TMP" "$CONFIG"

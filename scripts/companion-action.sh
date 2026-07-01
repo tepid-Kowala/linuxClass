@@ -56,29 +56,29 @@ case "$ACTION" in
     ;;
 
   feed)
-    E=$(read_val energy 4); H=$(read_val hunger 5)
+    E=$(read_val energy 4)
     if [ "$E" -ge 10 ]; then
       echo "MAXENERGY"
       cat "$CONFIG"
     else
-      NE=$(clamp $((E+1)) 0 10); NH=$(clamp $((H-2)) 0 10)
-      update_config ".energy=$NE | .hunger=$NH"
+      NE=$(clamp $((E+1)) 0 10)
+      update_config ".energy=$NE"
       COUNT=$(bump_ach times_fed)
-      echo "OK energy=$NE hunger=$NH achievement=$COUNT"
+      echo "OK energy=$NE achievement=$COUNT"
       cat "$CONFIG"
     fi
     ;;
 
   play)
-    E=$(read_val energy 4); H=$(read_val hunger 5)
+    E=$(read_val energy 4)
     if [ "$E" -le 0 ]; then
       echo "NOENERGY"
       cat "$CONFIG"
     else
-      NE=$(clamp $((E-1)) 0 10); NH=$(clamp $((H+1)) 0 10)
-      update_config ".energy=$NE | .hunger=$NH"
+      NE=$(clamp $((E-1)) 0 10)
+      update_config ".energy=$NE"
       COUNT=$(bump_ach times_played)
-      echo "OK energy=$NE hunger=$NH achievement=$COUNT"
+      echo "OK energy=$NE achievement=$COUNT"
       cat "$CONFIG"
     fi
     ;;
@@ -154,7 +154,7 @@ case "$ACTION" in
     ;;
 
   reset)
-    "$SCRIPTS/set-config.sh" name="Steve Bobs" friendly=7 sarcasm=5 energy=8 love=5 sadness=2 anger=2 hunger=5
+    "$SCRIPTS/set-config.sh" name="Steve Bobs" friendly=7 sarcasm=5 energy=8 love=5 sadness=2 anger=2
     ;;
 
   achievement)

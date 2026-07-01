@@ -65,8 +65,7 @@ if [ ! -f "$CONFIG_FILE" ]; then
   "energy": 8,
   "love": 5,
   "sadness": 2,
-  "anger": 2,
-  "hunger": 5
+  "anger": 2
 }
 CONF
 fi
