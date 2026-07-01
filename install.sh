@@ -26,6 +26,8 @@ cp "$SRC/.claude-plugin/plugin.json"                "$PLUGIN_DIR/.claude-plugin/
 cp "$SRC/skills/companion/SKILL.md"                 "$PLUGIN_DIR/skills/companion/SKILL.md"
 cp "$SRC/scripts/read-config.sh"                    "$PLUGIN_DIR/scripts/read-config.sh"
 cp "$SRC/scripts/write-config.sh"                   "$PLUGIN_DIR/scripts/write-config.sh"
+cp "$SRC/scripts/set-config.sh"                     "$PLUGIN_DIR/scripts/set-config.sh"
+cp "$SRC/scripts/companion-action.sh"               "$PLUGIN_DIR/scripts/companion-action.sh"
 cp "$SRC/scripts/read-memory.sh"                    "$PLUGIN_DIR/scripts/read-memory.sh"
 cp "$SRC/scripts/write-memory.sh"                   "$PLUGIN_DIR/scripts/write-memory.sh"
 cp "$SRC/scripts/achievements.sh"                   "$PLUGIN_DIR/scripts/achievements.sh"
@@ -37,6 +39,8 @@ cp "$SRC/hooks-handlers/user-prompt.sh"             "$PLUGIN_DIR/hooks-handlers/
 
 chmod +x "$PLUGIN_DIR/scripts/read-config.sh"
 chmod +x "$PLUGIN_DIR/scripts/write-config.sh"
+chmod +x "$PLUGIN_DIR/scripts/set-config.sh"
+chmod +x "$PLUGIN_DIR/scripts/companion-action.sh"
 chmod +x "$PLUGIN_DIR/scripts/read-memory.sh"
 chmod +x "$PLUGIN_DIR/scripts/write-memory.sh"
 chmod +x "$PLUGIN_DIR/scripts/achievements.sh"

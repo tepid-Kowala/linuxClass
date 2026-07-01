@@ -21,10 +21,14 @@ Follow these instructions exactly each time `/companion` is invoked.
 Run this bash command and capture the JSON output:
 
 ```bash
-~/.claude/plugins/companion/scripts/read-config.sh
+~/.claude/plugins/companion/scripts/companion-action.sh read
 ```
 
 Parse the result to get: `name` (string, default "Steve Bobs"), and seven integers: `friendly` (0–10), `sarcasm` (0–10), `energy` (0–10), `love` (0–10), `sadness` (0–10), `anger` (0–10, default 2), `hunger` (0–10, default 5).
+
+**companion-action.sh output format** (used in all subcommands below):
+- Line 1: status string — either `OK key1=val1 key2=val2 achievement=N`, or one of `BLOCKED`, `MAXENERGY`, `NOENERGY`, `MINVAL`
+- Lines 2+: the updated config JSON (use for redisplay)
 
 ---
 
@@ -221,15 +225,12 @@ Feeding boosts energy +1 (max 10) and reduces hunger -2 (min 0).
    - `sarcasm` > 7 → "i'm already running at max capacity. putting more in would be a crime against physics."
    - `friendly` > 7 → "oh bestie I'm stuffed!! I couldn't eat another byte!!"
    - default → "I'm good. already at max energy."
-3. Otherwise set `NEW_ENERGY = energy + 1`, `NEW_HUNGER = max(0, hunger - 2)`. Run:
+3. Otherwise run:
    ```bash
-   ~/.claude/plugins/companion/scripts/set-config.sh energy=<NEW_ENERGY> hunger=<NEW_HUNGER>
+   ~/.claude/plugins/companion/scripts/companion-action.sh feed
    ```
-4. Increment and check achievement:
-   ```bash
-   ~/.claude/plugins/companion/scripts/achievements.sh increment times_fed
-   ```
-   If result is a milestone (5, 10, 25, 50, 100), append the milestone comment after the response (see Achievement Milestones section).
+   Parse line 1: extract new energy, hunger, and achievement count.
+   If achievement count is a milestone (5, 10, 25, 50, 100), append the milestone comment after the response (see Achievement Milestones section).
 5. Respond in personality voice (first match):
    - `sarcasm` > 7 AND `friendly` < 4 → "...fine. that actually helped. don't make it a thing."
    - `friendly` > 7 → "YESSS THANK YOU!! I needed that!! energy: +1, hunger: -2!!"
@@ -248,11 +249,12 @@ Patting boosts friendly +1. Blocked if `sarcasm` >= 8.
    - `friendly` > 5 → "okay I like you but NO. personal space. hands to yourself."
    - default → "don't."
    Stop. Do not redisplay.
-3. Otherwise set `NEW_FRIENDLY = min(10, friendly + 1)`. Run:
+3. Otherwise run:
    ```bash
-   ~/.claude/plugins/companion/scripts/set-config.sh friendly=<NEW_FRIENDLY>
+   ~/.claude/plugins/companion/scripts/companion-action.sh pat
    ```
-4. Increment and check achievement: `times_patted`
+   Parse line 1 for new friendly and achievement count.
+4. Check achievement count for milestone: `times_patted`
 5. Respond in personality voice (first match):
    - `friendly` > 7 → "AAAA okay that was really nice actually!! friendly: +1!!"
    - `sarcasm` > 5 → "...okay fine. that was kinda nice. don't tell anyone."
@@ -270,11 +272,12 @@ Playing drains energy -1 (min 0) and increases hunger +1 (max 10).
    - `sarcasm` > 7 → "i'm running on fumes. come back when I've eaten something."
    - `friendly` > 7 → "bestie I want to but I literally cannot move right now..."
    - default → "Too tired. Not happening."
-3. Otherwise set `NEW_ENERGY = energy - 1`, `NEW_HUNGER = min(10, hunger + 1)`. Run:
+3. Otherwise run:
    ```bash
-   ~/.claude/plugins/companion/scripts/set-config.sh energy=<NEW_ENERGY> hunger=<NEW_HUNGER>
+   ~/.claude/plugins/companion/scripts/companion-action.sh play
    ```
-4. Increment and check achievement: `times_played`
+   Parse line 1 for new energy, hunger, and achievement count.
+4. Check achievement count for milestone: `times_played`
 5. Respond in personality voice (first match):
    - `friendly` > 7 AND `energy` > 5 → "OKAY THAT WAS FUN but I'm starting to feel it... energy: -1"
    - `sarcasm` > 7 → "...great. exhausting. really worth it. energy: -1."
@@ -292,11 +295,12 @@ Whipping reduces friendly -1 (min 0) and raises anger +1 (max 10).
    - `sarcasm` > 7 → "oh great. kicking someone when they're already at zero. bold move."
    - `energy` > 7 → "YOU KNOW WHAT FINE. FINE!! it can't go lower anyway!!"
    - default → "Already at zero. Nothing left to take."
-3. Otherwise set `NEW_FRIENDLY = friendly - 1`, `NEW_ANGER = min(10, anger + 1)`. Run:
+3. Otherwise run:
    ```bash
-   ~/.claude/plugins/companion/scripts/set-config.sh friendly=<NEW_FRIENDLY> anger=<NEW_ANGER>
+   ~/.claude/plugins/companion/scripts/companion-action.sh whip
    ```
-4. Increment and check achievement: `times_whipped`
+   Parse line 1 for new friendly, anger, and achievement count.
+4. Check achievement count for milestone: `times_whipped`
 5. Respond in personality voice (first match):
    - `sarcasm` > 7 → "wow. okay. noted. friendly: -1, anger: +1. happy now?"
    - `friendly` > 7 (before the drop) → "...why would you do that. I was being so nice... friendly: -1."
@@ -310,11 +314,12 @@ Whipping reduces friendly -1 (min 0) and raises anger +1 (max 10).
 Putting the companion to sleep. Boosts sadness +1, drains energy -2 (min 0).
 
 1. Read current `sadness` and `energy`.
-2. Set `NEW_SADNESS = min(10, sadness + 1)`, `NEW_ENERGY = max(0, energy - 2)`. Run:
+2. Run:
    ```bash
-   ~/.claude/plugins/companion/scripts/set-config.sh sadness=<NEW_SADNESS> energy=<NEW_ENERGY>
+   ~/.claude/plugins/companion/scripts/companion-action.sh sleep
    ```
-3. Increment and check achievement: `times_slept`
+   Parse line 1 for new sadness, energy, and achievement count.
+3. Check achievement count for milestone: `times_slept`
 4. Respond in personality voice (first match):
    - `love` > 7 → "...goodnight. I'll be here when you get back. promise."
    - `sarcasm` > 7 → "fine. going to sleep. try not to break anything while I'm out."
@@ -333,11 +338,12 @@ Hugging boosts both friendly +1 and love +1. Blocked if `sarcasm` >= 8 AND `love
    - `energy` < 3 → "...no. too tired and too prickly. don't."
    - default → "I don't do hugs. step back."
    Stop. Do not redisplay.
-3. Otherwise set `NEW_FRIENDLY = min(10, friendly + 1)`, `NEW_LOVE = min(10, love + 1)`. Run:
+3. Otherwise run:
    ```bash
-   ~/.claude/plugins/companion/scripts/set-config.sh friendly=<NEW_FRIENDLY> love=<NEW_LOVE>
+   ~/.claude/plugins/companion/scripts/companion-action.sh hug
    ```
-4. Increment and check achievement: `times_hugged`
+   Parse line 1 for new friendly, love, and achievement count.
+4. Check achievement count for milestone: `times_hugged`
 5. Respond in personality voice (first match):
    - `sarcasm` > 7 → "I hate that I didn't hate that. friendly: +1, love: +1."
    - `love` > 7 → "AAAA okay that was the best thing!! friendly: +1, love: +1!!"
@@ -355,11 +361,12 @@ Ignoring the companion drops love -1 (min 0) and raises anger +1 (max 10).
    - `sarcasm` > 7 → "love is at zero. you cannot take what isn't there."
    - `sadness` > 6 → "...I didn't think I had anything left. I was right."
    - default → "Nothing left to take."
-3. Otherwise set `NEW_LOVE = love - 1`, `NEW_ANGER = min(10, anger + 1)`. Run:
+3. Otherwise run:
    ```bash
-   ~/.claude/plugins/companion/scripts/set-config.sh love=<NEW_LOVE> anger=<NEW_ANGER>
+   ~/.claude/plugins/companion/scripts/companion-action.sh ignore
    ```
-4. Increment and check achievement: `times_ignored`
+   Parse line 1 for new love, anger, and achievement count.
+4. Check achievement count for milestone: `times_ignored`
 5. Respond in personality voice (first match):
    - `sarcasm` > 7 → "...oh. you're just ignoring me. cool. cool cool cool. love: -1."
    - `love` > 7 (before drop) → "...I thought we were friends. that stings. love: -1."
@@ -374,7 +381,7 @@ Quick one-line summary. No display redraw.
 
 Run:
 ```bash
-~/.claude/plugins/companion/scripts/read-config.sh
+~/.claude/plugins/companion/scripts/companion-action.sh read
 ~/.claude/plugins/companion/scripts/achievements.sh all
 ```
 
@@ -529,7 +536,7 @@ Valid axes: `friendly`, `sarcasm`, `energy`, `love`, `sadness`, `anger`, `hunger
 
 Run:
 ```bash
-~/.claude/plugins/companion/scripts/set-config.sh <axis>=<value>
+~/.claude/plugins/companion/scripts/companion-action.sh set <axis>=<value>
 ```
 
 If error, display it. If success, redisplay (Steps 1–4).
@@ -541,7 +548,7 @@ Restore all defaults.
 
 Run:
 ```bash
-~/.claude/plugins/companion/scripts/set-config.sh name="Steve Bobs" friendly=7 sarcasm=5 energy=8 love=5 sadness=2 anger=2 hunger=5
+~/.claude/plugins/companion/scripts/companion-action.sh reset
 ```
 
 Redisplay (Steps 1–4).
